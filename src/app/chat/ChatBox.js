@@ -2,31 +2,34 @@
 import { useEffect, useState, useRef } from "react";
 import useSocket from "../../sockets/sockets";
 import "./chat.css"; // Make sure this CSS file exists
+import { useSocketStore } from "@/sockets/socketStore";
+import {
+  disconnectPartner,
+  sendMessage,
+  connectAnonymousChat,
+  findNewPartner,
+} from "@/sockets/socketActions";
 
 export default function ChatBox() {
-  const {
-    socket,
-    isConnected,
-    partnerId,
-    status,
-    chatLog,
-    message,
-    disconnectPartner,
-    findNewPartner,
-    sendMessage,
-    receiveMessage,
-    setMessage,
-    isFirstTime
-  } = useSocket();
-
+  const { chatLog, status, message, partnerId, isFirstTime, socket } =
+    useSocketStore((state) => state);
+  const { setChatLog, setStatus, setMessage } = useSocketStore(
+    (state) => state
+  );
   const chatEndRef = useRef(null);
+  const messageTextField = useRef(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatLog]);
-  // useEffect(() => {
-  //  receiveMessage();
-  // }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+    connectAnonymousChat({ socket });
+  }, [socket]);
+  useEffect(() => {
+    messageTextField.current?.focus();
+  }, []);
 
   return (
     <div className="chat-box">
@@ -47,24 +50,54 @@ export default function ChatBox() {
         <div ref={chatEndRef} />
       </div>
       <div className="chat-features">
-     { (partnerId || !isFirstTime) && <div className="chat-options">
-      {partnerId &&  <button onClick={disconnectPartner} >End Chat</button>}
-      {!isFirstTime && <button onClick={findNewPartner}>New chat</button>} 
-      </div>
-}
-      <div className="chat-input-bar">
-       
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type a message"
-          disabled={!partnerId}
-        />
-        <button onClick={sendMessage} disabled={!partnerId}>
-          📩
-        </button>
-      </div>
+        {(partnerId || !isFirstTime) && (
+          <div className="chat-options">
+            {partnerId && (
+              <button
+                onClick={() => {
+                  disconnectPartner({ setPartnerId, socket });
+                }}
+              >
+                End Chat
+              </button>
+            )}
+            {!isFirstTime && (
+              <button
+                onClick={() => {
+                  findNewPartner({ socket });
+                }}
+              >
+                New chat
+              </button>
+            )}
+          </div>
+        )}
+        <div className="chat-input-bar">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message"
+            disabled={!partnerId}
+            ref={messageTextField}
+          />
+          <button
+            onClick={() => {
+              sendMessage({
+                message,
+                setChatLog,
+                setStatus,
+                setMessage,
+                chatLog,
+                partnerId,
+                socket,
+              });
+            }}
+            disabled={!partnerId}
+          >
+            📩
+          </button>
+        </div>
       </div>
     </div>
   );

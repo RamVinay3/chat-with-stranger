@@ -1,0 +1,42 @@
+
+   .video-box{
+    height:50vh;
+    width:100vw;
+   }
+   .controls-overlay{
+    display: flex;
+    justify-content: center;
+    transform: translateY(-65px);
+    gap:10px;
+    align-items: center;
+   }
+   .icon-wrapper{
+    background-color: white;
+    border-radius: 50%;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   }
+   .icon-stop{
+    stroke:red;
+   }
+   .icon-idle{
+    stroke:skyblue
+   }
+   .icon-wrapper-answer-call{
+    background-color: green;
+    
+   }
+   .icon-wrapper-end-call{
+    background-color: red;
+    
+   }
+   .phone{
+    stroke:white;
+    fill:white;
+    transform: rotate(132deg);
+   }
+   .icon-wrapper-intiate-call{
+    background-color: rgb(6, 102, 147);
+   }
