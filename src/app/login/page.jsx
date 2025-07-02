@@ -5,36 +5,38 @@ import Button from "@/app/components/Button";
 import { UtilConstant } from '../utils/UtilConstants';
 import { apiRequest } from "../utils/api";
 import { useRouter } from 'next/navigation';
+import './login.css';
 
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
+  const [isNewUser,setIsNewUser]=useState(true);
   const router=useRouter();
 
   const validate = () => {
     const newErrors = {};
     if (!form.username.trim()) newErrors.username = "Username is required";
    
-    if (!form.password.trim()) newErrors.password = "Password is required";
+    if (!isNewUser && !form.password.trim()) newErrors.password = "Password is required";
 
     return newErrors;
   };
-  useEffect(() => {
-    const state = window.history.state;
-    if (state?.success) {
-      setMessage("Successfully created account");
+  // useEffect(() => {
+  //   const state = window.history.state;
+  //   if (state?.success) {
+  //     setMessage("Successfully created account");
 
-      const timer = setTimeout(() => {
-        setMessage('');
-        // Optionally remove state after showing message
-        window.history.replaceState({}, '');
-      }, 3000);
+  //     const timer = setTimeout(() => {
+  //       setMessage('');
+  //       // Optionally remove state after showing message
+  //       window.history.replaceState({}, '');
+  //     }, 3000);
 
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, []);
 
   const handleChange = (e) => {
     if (errors[e.target.name]) {
@@ -42,7 +44,61 @@ export default function LoginPage() {
     }
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+  const userNameExist=async ()=>{
+    const payload={
+      username:form.username
+    }
+    try {
+      const data = await apiRequest({
+        endpoint: UtilConstant.CHECK_USERNAME,
+        method: 'POST',
+       body:payload
+      });
+     
+      if(data.hasError){
+        const err={};
+        err.db=data.error;
+        setErrors(err);
+        return true;
+      }
+      else{
+        return false;
+        
+      }
+     
+    } catch (error) {
+      console.log(error, "I am error");
+     
+    }
 
+    
+
+  }
+  const checkTransition=async (e)=>{
+    e.preventDefault();
+     const validationErrors= validate();
+   if (Object.keys(validationErrors).length > 0) {
+    setErrors(validationErrors);
+    return;
+  }
+    if(isNewUser){
+      //validate the user and entry to the next chat
+      const exists = await userNameExist();
+     
+      if(exists){
+        setErrors({username:"Username already exist"});
+        return;
+      }
+      else{
+        setErrors({username:""});
+        sessionStorage.setItem('username',form.username);
+        router.push('/');
+      }
+    }
+    else {
+      handleSubmit();
+    }
+  }
   const handleSubmit = async(e) => {
     e.preventDefault();
    const validationErrors= validate();
@@ -94,7 +150,7 @@ export default function LoginPage() {
       {/* <h1>Login</h1> */}
       {errors.db && <div className="error-message">{errors.db}</div>}
       {message && <div className="info-message">{message}</div>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={checkTransition}>
         <Input
           type="text"
           name="username"
@@ -103,6 +159,7 @@ export default function LoginPage() {
           onChange={handleChange}
           err={errors.username}
           />
+        { !isNewUser && 
         <Input
           type="password"
           name="password"
@@ -110,9 +167,17 @@ export default function LoginPage() {
           value={form.password}
           onChange={handleChange}
           err={errors.password}
-        />
-        <Button type="submit">Login</Button>
+        />}
+
+        <Button type="submit">{!isNewUser?'Login':'Continue'}</Button>
+       
       </form>
+      {
+          isNewUser && <p  className="extra-options" role="button" onClick={()=>setIsNewUser(false)}>Already have an account?</p>
+        }
+        {
+          !isNewUser && <div className="extra-options"  onClick={()=>setIsNewUser(true)}>Wish to chat without login?</div>
+        }
     </div>
     </div>
   );

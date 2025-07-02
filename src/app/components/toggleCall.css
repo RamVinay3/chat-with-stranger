@@ -1,0 +1,59 @@
+.incoming-call-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .caller-name {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .call-actions {
+    display: flex;
+    gap: 4rem;
+  }
+  
+  /* .icon {
+    cursor: pointer;
+    background: white;
+    border-radius: 50%;
+    padding: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+     animation: bounce 1s infinite; 
+  } */
+  
+  .green-phone {
+    color: green;
+    /* animation: bounce 1s infinite; */
+    width: 32px;
+    height: 32px;
+  }
+  
+  .red-phone {
+    color: red;
+    width: 32px;
+    height: 32px;
+  }
+  
+  /* Bouncing animation */
+  @keyframes bounce {
+    0%   { transform: translateY(0); }
+   
+    50%  { transform: translateY(-30px); }
+    
+    100% { transform: translateY(0); }
+  }
+  

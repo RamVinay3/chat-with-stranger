@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import useSocket from "../../sockets/sockets";
 import "./chat.css"; // Make sure this CSS file exists
 import { useSocketStore } from "@/sockets/socketStore";
 import {
@@ -8,16 +7,26 @@ import {
   sendMessage,
   connectAnonymousChat,
   findNewPartner,
+  initiateCall,
 } from "@/sockets/socketActions";
+import { Video , SendHorizontal, Mic,MicOff} from "lucide-react";
+import { useRouter } from 'next/navigation';
+import VideoCallInterface from "../video-call/VideoInterface";
+import ToggleCall from "../components/ToggleCall";
+import VoiceRecorder from "../components/VoiceRecorder";
+import VoiceMessageChat from "../components/VoiceRecorder";
 
 export default function ChatBox() {
-  const { chatLog, status, message, partnerId, isFirstTime, socket } =
+
+  const { chatLog, status, message, partnerId, isFirstTime, socket,videoCallActive,showModal } =
     useSocketStore((state) => state);
-  const { setChatLog, setStatus, setMessage } = useSocketStore(
+  const { setChatLog, setStatus, setMessage, setPartnerId,setVideoCallActive,setVideoCallStatus } = useSocketStore(
     (state) => state
   );
   const chatEndRef = useRef(null);
   const messageTextField = useRef(null);
+  const router=useRouter();
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -29,15 +38,30 @@ export default function ChatBox() {
   }, [socket]);
   useEffect(() => {
     messageTextField.current?.focus();
-  }, []);
-
+  }, [messageTextField]);
+  
+ 
   return (
     <div className="chat-box">
       <div className="chat-header">
         <span>👤 {partnerId ? "Stranger" : "Waiting..."}</span>
-        <span className={`status ${partnerId ? "online" : "offline"}`}>
-          ● {partnerId ? "Online" : "Offline"}
-        </span>
+        <div className="chat-header-options">
+         {
+          partnerId&&
+          ( <div onClick={()=>{
+           
+            setVideoCallActive(true);
+            setVideoCallStatus("intiating-call");
+          }} disabled={!partnerId}>
+          
+            <Video size={30} color="white" />
+          </div>
+          )
+         }
+          <span className={`status ${partnerId ? "online" : "offline"}`}>
+            ● {partnerId ? "Online" : "Offline"}
+          </span>
+        </div>
       </div>
 
       <div className="chat-messages">
@@ -64,7 +88,12 @@ export default function ChatBox() {
             {!isFirstTime && (
               <button
                 onClick={() => {
-                  findNewPartner({ socket });
+                  findNewPartner({
+                    socket,
+                    setChatLog,
+                    setPartnerId,
+                    setStatus,
+                  });
                 }}
               >
                 New chat
@@ -81,7 +110,9 @@ export default function ChatBox() {
             disabled={!partnerId}
             ref={messageTextField}
           />
-          <button
+          <div
+           className={`send-button `}
+          
             onClick={() => {
               sendMessage({
                 message,
@@ -95,10 +126,14 @@ export default function ChatBox() {
             }}
             disabled={!partnerId}
           >
-            📩
-          </button>
+           <SendHorizontal size={26} />
+          </div>
+          {!message && partnerId && !isRecording && <div className="mic-intial"><Mic /></div>}
+          {!message && partnerId && isRecording && <div className="mic-off"><MicOff  /></div>}
+          {/* <VoiceMessageChat socket={socket} toUsername={partnerId} /> */}
         </div>
       </div>
     </div>
   );
+ 
 }

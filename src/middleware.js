@@ -5,10 +5,13 @@ import jwt from 'jsonwebtoken';
 
 export function middleware(request) {
  
-  const token = request.cookies.get('jwt')?.value;
+  // const token = request.cookies.get('jwt')?.value;
 
   const { pathname } = request.nextUrl;
-  console.log('🔥 Middleware Triggered',pathname); // Add this log for debugging
+  // console.log(request,"request")
+  // console.log('🔥 Middleware Triggered',pathname); // Add this log for debugging
+  // console.log(token, "token");
+  // const token=sessionStorage.getItem('jwt');
 
   const isAuthRoute = pathname === '/login' || pathname === '/signup';
   const isProtectedRoute = pathname === '/' || pathname.startsWith('/home');
@@ -25,27 +28,14 @@ export function middleware(request) {
       return NextResponse.next();
     }
 
-  if (!token && isProtectedRoute) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  if (token && isAuthRoute) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-  // if (token) {
-  //   try {
-  //     jwt.verify(token, 'somesupersecretsecret');
-
-  //     if (isAuthRoute) {
-  //       return NextResponse.redirect(new URL('/', request.url));
-  //     }
-  //   } catch (err) {
-  //     if (err.name === 'TokenExpiredError') {
-  //       return NextResponse.redirect(new URL('/login?expired=true', request.url));
-  //     }
-  //     return NextResponse.redirect(new URL('/login', request.url));
-  //   }
+  // if (!token && isProtectedRoute) {
+  //   return NextResponse.redirect(new URL('/login', request.url));
   // }
+  // console.log(token,"token")
+  // if (token && isAuthRoute) {
+  //   return NextResponse.redirect(new URL('/', request.url));
+  // }
+  
 
   
 

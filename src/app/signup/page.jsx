@@ -73,7 +73,7 @@ export default function SignupPage() {
         // router.push("/login");
       
         router.replace('/login', undefined, { shallow: true });
-        window.history.replaceState({ success: true }, '');
+        // window.history.replaceState({ success: true }, '');
       }
       return { props: { data } };
     } catch (error) {
